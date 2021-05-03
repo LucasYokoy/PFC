@@ -128,5 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#dataset folder
-dataset/
+#raw dataset folders
+dataset/raw/
+docs/squad/
+docs/pdfs/
+
+# test folder
+bert/test/
