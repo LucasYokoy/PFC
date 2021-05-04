@@ -128,10 +128,17 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#raw dataset folders
+# raw dataset folders
 dataset/raw/
-docs/squad/
-docs/pdfs/
+Q&A tests/docs/squad/
+Q&A tests/docs/pdfs/
+
+# final unused dataset
+dataset/final/AtasCDINF/atasPDF
+dataset/final/Grupo PET/
+
+# unused models
+Q&A tests/models/
 
 # test folder
-bert/test/
+bert/
