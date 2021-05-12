@@ -49,3 +49,8 @@ corpus = openFile(".\\docs\\txt\\80a Reuni+úo.txt")
 question="Quando começou a octagésima reunião?"
 result = nlp(question=question, context=corpus)
 print(result)
+
+#%%
+question="Quem presidiu a octagésima reunião?"
+result = nlp(question=question, context=corpus)
+print(result)

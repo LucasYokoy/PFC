@@ -5,57 +5,44 @@ Created on Wed May  5 10:55:17 2021
 @author: Lucas
 """
 
-# Get path to all files in all folders in /dataset/final
-# On first version, do only /dataset/final/AtasCDINF
-# return list with paths to files
-import os
-# dataset_basedir = "D:/Documentos/PFC-projeto"
-# raw_dir = dataset_basedir + "/dataset/final/AtasCDINF/atasDOCX/"
-base_dir = "D:/Documentos/PFC-projeto/PFC/dataset/final/AtasCDINF/atasDOCX/"
-def listDirectory(base_dir):
-    files = os.listdir(base_dir)
-    files = [base_dir + file_path for file_path in files]
-    return files
+#%%
+# list files in dataset directory
+from create_corpus import list_directory
 
-files_docx = listDirectory(base_dir)
+base_dir = "D:/Documentos/PFC-projeto/PFC/dataset/final/AtasCDINF/atasDOCX/"
+files_docx = list_directory(base_dir)
 print(files_docx)
 
-#%%
 
+#%%
 # create corpus
-# function that opens each file:
-def openFile(path):
-    # open file path
-    my_file = open(path, mode='r', encoding='utf-8')
-    # for each line in the file
-    file_var = ""
-    for line in my_file:
-        # append line to variable
-        file_var += line
-    # return variable
-    return file_var
+from create_corpus import create_corpus
+from create_corpus import clean_names
 
-# open all documents and append them to a list
-def createCorpus(file_list):
-    # output is initially an empty string
-    output = []
-    # loop thru list of file paths
-    for filename in file_list:
-        # open file (read mode)
-        file = openFile(filename)
-        # append that to output
-        output.append(file)
-    return output
+corpus = create_corpus(files_docx)
+corpus = clean_names(corpus)
 
-corpus = createCorpus(files_docx)
-print(corpus)
-print(len(corpus))
+corpus_items = list(corpus.items())
+print(corpus_items[:2])
+print(len(corpus_items))
 
 #%%
 
-# create nlp model and pipeline (one with base and one with large)
+# filter off relevant corpus, based on the question, before feeding it into the model
+from filter_corpus import filter_corpus
+
+question_test = "Quando começou a Octogésima reunião do INF?"
+relevant_corpus = filter_corpus(question_test, corpus)
+
+relevant_corpus_items = list(relevant_corpus.items())
+print(relevant_corpus_items)
+print(len(relevant_corpus_items))
+
+#%%
+
+# create nlp model and pipeline
 path_base = "pierreguillou/bert-base-cased-squad-v1.1-portuguese"
-# path_large = "pierreguillou/bert-large-cased-squad-v1.1-portuguese"
+
 def createModel(model_path):
     # import transformers
     # don't forget to set device=0 so it runs on the GPU or -1 to run on CPU
@@ -65,44 +52,51 @@ def createModel(model_path):
     return nlp
 
 nlp_base = createModel(path_base)
-# nlp_large = createModel(path_large)
 
 #%%
 
 # process answer (args: question, model, corpus)
 def answer_question(question, model, corpus):
+    # filter the corpus, according to the question    
+    corpus_items = filter_corpus(question, corpus).items()
     # feed the question and the corpus to the model
-    results = []
-    for text in corpus:
-        result = model(question=question, context=text)
+    results = {}
+    for name, sample in corpus_items:
+        result = model(question=question, context=sample)
         print(result)
-        results.append(result)
+        # append file name and answer to the question
+        results[name] = result
     return results
-    # pick context:
-        # crop 10 words around the cropped answer (use the start/end parameters as reference)
-    # return object with answer data:
-        # return contains answer
-        # return contains context around the answer
 
-question = "Quem presidiu a octagésima reunião do INF?"
-answer = answer_question(question, nlp_base, corpus)
-print(answer)
+# test question: "Quando começou a Octogésima reunião do INF?"
+question = question_test
+answers = answer_question(question, nlp_base, corpus)
+
+#%%
+
+question = "Quem presidiu a Centésima reunião?"
+answers1 = answer_question(question, nlp_base, corpus)
+
+
 #%%
 # sort answers, and select best
 # transform list into pandas dataframe (keys as labels and values as data)
 import pandas as pd
-def sort_answers(answers_list):
+def sort_answers(answers):
     # loop thru list of answers
     temp = []
-    for answer in answers_list:
+    answers_list = answers.items()
+    for name, answer in answers_list:
         # extract data from each dict
         data = list(answer.values())
-        temp.append(data)
+        temp.append([name]+data)
         # append data to dataframe
     # sort dataframe on the score column
     # create dataframe
-    # use keys in the first element as labels
-    columns = list(answers_list[0].keys())
+    # use keys in the first element as labels, plus the name of the file
+    keys = list(answers.values())
+    keys = keys[0].keys()
+    columns = ['name'] + list(keys)
     # use temp as values
     df = pd.DataFrame(data=temp, columns=columns)#, sort='score')
     # sort values by the 'score' column
@@ -111,9 +105,28 @@ def sort_answers(answers_list):
     return df
 
 # print(pd.DataFrame(data=None, columns=list(answer[0].keys())))
-sorted_answers = sort_answers(answer)
+sorted_answers = sort_answers(answers)
 print(sorted_answers)
+print("================")
+sorted_answers1 = sort_answers(answers1)
+print(sorted_answers1)
+
 #%%
 
+# display answers in order of relevance
+# generator: receives list of answers as argument
+def display_answers(answers):
+    # loop thru answers
+        # pick context:
+            # crop 10 words around the cropped answer (use the start/end parameters as reference)
+        # yield object with answer data:
+            # return contains answer
+            # return contains context around the answer
+    pass
+
+answers_displayer = display_answers(sorted_answers)
+
+#%%
 print(sorted_answers.iloc[0]['answer'])
+print(sorted_answers.iloc[0])
 # try implementing an interface

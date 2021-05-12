@@ -10,8 +10,9 @@ Created on Wed May  5 10:48:50 2021
 # On first version, do only /dataset/raw/AtasCDINF
 # return list with paths to files
 import os
-dataset_basedir = "D:\\Documentos\\PFC-projeto\\dataset"
-rawPDF_dir = dataset_basedir + "\\raw\\AtasCDINF\\atasPDF\\"
+# dataset_basedir = "D:\\Documentos\\PFC-projeto\\dataset"
+# rawPDF_dir = dataset_basedir + "\\raw\\AtasCDINF\\atasPDF\\"
+rawPDF_dir = "D:/Documentos/PFC-projeto/PFC/dataset/final/AtasCDINF/atasPDF"
 def listDirectory(raw_dir):
     files = os.listdir(raw_dir)
     files = [raw_dir + file_path for file_path in files]
@@ -100,6 +101,9 @@ def dataCleaning(fileString):
     output = re.sub("_*", "", output)
     # New lines don't have any meaning here. Delete them
     output = output.replace("\n", " ")
+    # clean list of names in the end (everything after the last '.')
+    temp = output.rpartition('.')
+    output = temp[0] + temp[1]
     # Return cleaned fileString
     return output
 # In[ ]
