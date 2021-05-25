@@ -142,3 +142,6 @@ Q&A tests/models/
 
 # test folder
 bert/
+
+# training folder
+training/

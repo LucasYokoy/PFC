@@ -45,13 +45,9 @@ def create_corpus(file_list):
         name = filename.rsplit('/', 1)[1]
         # append file name and content to output
         output[name] = file
-    return output
-
-#%%
-# clean list of names in the end, using tabs
-def clean_names(corpus):
+    # clean list of names in the end, using tabs
     # loop thru list of files
-    file_list = corpus.items()
+    file_list = output.items()
     output = {}
     for file_name, file_content in file_list:
         # split file in sections by '.'

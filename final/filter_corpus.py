@@ -54,4 +54,7 @@ def filter_corpus(question, corpus):
         lowercase_text = text.lower()
         if any(word in lowercase_text for word in capitalized_words):
             output[name] = text
+    # if the length of the filtered corpus is 0, filter nothing
+    if len(output.items()) == 0:
+        return corpus
     return output
